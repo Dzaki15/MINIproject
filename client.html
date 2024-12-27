@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kapal WebSocket Client</title>
+    <style>
+ * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+#status {
+  margin-bottom: 1.5rem;
+}
+
+#status div {
+  border-radius: 8px;
+  font-weight: 500;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+#notifications {
+  background: #fff;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  max-height: 600px;
+}
+
+.notification {
+  padding: 1rem;
+  margin: 0 0 1rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.notification:first-child {
+  margin-top: 0;
+}
+
+.notification:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.create {
+  background-color: #f0fff4;
+  border: 1px solid #c6f6d5;
+  color: #2f855a;
+}
+
+.update {
+  background-color: #ebf8ff;
+  border: 1px solid #bee3f8;
+  color: #2b6cb0;
+}
+
+.delete {
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  color: #c53030;
+}
+
+pre {
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  #notifications {
+    padding: 1rem;
+  }
+}
+    </style>
+</head>
+<body>
+    <h1>DATA PELABUHAN</h1>
+    <div id="status"></div>
+    <div id="notifications"></div>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:3000');
+        const notificationsDiv = document.getElementById('notifications');
+        const statusDiv = document.getElementById('status');
+
+        function updateStatus(message, isConnected) {
+            statusDiv.innerHTML = `
+                <div style="color: ${isConnected ? 'green' : 'red'}; 
+                            padding: 10px; 
+                            margin: 10px 0;
+                            border: 1px solid ${isConnected ? 'green' : 'red'};">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function addNotification(data) {
+            const notifClass = data.event.includes('ditambahkan') ? 'create' : 
+                             data.event.includes('diperbarui') ? 'update' : 
+                             data.event.includes('dihapus') ? 'delete' : '';
+
+            const time = new Date().toLocaleTimeString();
+            
+            const notifHtml = `
+                <div class="notification ${notifClass}">
+                    <strong>[${time}] ${data.event}</strong><br>
+                    ${data.message}<br>
+                    <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                </div>
+            `;
+            
+            notificationsDiv.insertAdjacentHTML('afterbegin', notifHtml);
+        }
+
+        ws.onopen = () => {
+            console.log('Terhubung ke server WebSocket');
+            updateStatus('Terhubung ke server WebSocket', true);
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('Notifikasi:', data);
+            addNotification(data);
+        };
+
+        ws.onclose = () => {
+            console.log('Terputus dari server WebSocket');
+            updateStatus('Terputus dari server WebSocket', false);
+            
+            // Mencoba koneksi ulang setelah 5 detik
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        };
+
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            updateStatus('Error pada koneksi WebSocket', false);
+        };
+    </script>
+</body>
+</html> 

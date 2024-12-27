@@ -1,0 +1,65 @@
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin123",
+    "role": "admin"
+}
+
+###
+
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin123"
+}
+
+###
+POST http://localhost:3000/kapal
+header :
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+    "nama_kapal": "imam nnn",
+    "jenis_kapal": "cargo",
+    "kapasitas_muatan": 50000
+}
+
+###
+GET http://localhost:3000/kapal
+Headers:
+Authorization: Bearer 
+
+
+###
+PUT http://localhost:3000/kapal/2
+Headers:
+Authorization: Bearer 
+Content-Type: application/json
+{
+    "nama_kapal": "Laut nnn Update",
+    "jenis_kapal": "Penutup",
+    "kapasitas_muatan" : 60000
+}
+
+
+###
+DELETE http://localhost:3000/kapal/2
+Headers:
+Authorization: Bearer 
+
+###
+POST http://localhost:3000/auth/register
+Headers:
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+    "username": "user1",
+    "password": "user123",
+    "role": "user"
+}
